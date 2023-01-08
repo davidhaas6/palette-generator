@@ -1,38 +1,70 @@
+:root {
+    --color-0: #8B8793;
+    --color-1: #4F4F4F;
+    --color-2: #7B9D9F;
+    --color-3: #F0F2F2;
+    --color-4: #D1D8E0;
+  }
+
+
 .App {
-  text-align: center;
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    height: 100vh;
+
+    background-color: var(--color-3);
+    color: #000000;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.Body {
+    display: flex;
+    /* flex-direction: column; */
+    width: 100%;
+    flex-flow: column nowrap;
+    /* justify-content: center; */
+    /* align-items: center; */
+    padding: 5%;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+.toolbar {
+    height: 50px;
+    text-align: center;
+}
+
+
+.sidebar {
+    width: 200px;
+    height: 100%;
+    overflow: auto;
+}
+
+.saved-palette {
+    padding-top: 12px;
+
+    transition: transform 0.2s ease;  /* Add a transition effect */
   }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+  
+  .saved-palette:hover {
+    transform: scale(1.08);  /* Expand the div on hover */
   }
-  to {
-    transform: rotate(360deg);
+  
+  .saved-palette:active {
+    transform: scale(0.98);  /* Shrink the div on click */
   }
+
+.saved-colors {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.saved-color {
+    width: 20%;
+    height: 60px;
+}
+
+.disable {
+    cursor: not-allowed !important;
+    pointer-events: none;
+    /* color: GrayText; */
 }
