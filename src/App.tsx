@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import Palette from './components/Palette';
 import Sidebar from './components/Sidebar';
-import { FetchInfo } from './hooks';
+import { getHexDiscussionPrompt } from './prompt';
 
 import { Configuration, OpenAIApi } from 'openai';
 
@@ -20,14 +20,6 @@ type Palette = {
   comment?: string,
 }
 
-function getHexPrompt(query: string) {
-  return "a five-color color palette for " + query + "\ncomma-delimited list of hex codes:";
-}
-
-function getHexDiscussionPrompt(query: string) {
-  return "a five-color color palette for " + query + ". First, output a comma-delimited list of hex codes. Then output a semicolon and briefly discuss aspects of the palette with respect to the prompt:"
-}
-
 async function getColorPalette(query: string, verbose?: boolean) {
   const prompt = getHexDiscussionPrompt(query);
   if(verbose != null) {
@@ -37,7 +29,7 @@ async function getColorPalette(query: string, verbose?: boolean) {
     model: "text-davinci-003",
     prompt: prompt,
     temperature: 0.8,
-    max_tokens: 120,
+    max_tokens: 200,
     top_p: 1,
     frequency_penalty: 0,
     presence_penalty: 0,
@@ -74,7 +66,6 @@ function App() {
             } 
             const colors = colorText?.trim().split(',');
             setColors(() => colors);
-            console.log("colors: ", respText?.trim().split(','));
           }
         }
       } catch (error: any) {

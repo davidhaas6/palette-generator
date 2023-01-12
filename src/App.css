@@ -46,11 +46,11 @@
   }
   
   .saved-palette:hover {
-    transform: scale(1.08);  /* Expand the div on hover */
+    transform: scale(1.05);  /* Expand the div on hover */
   }
   
   .saved-palette:active {
-    transform: scale(0.98);  /* Shrink the div on click */
+    transform: scale(0.97);  /* Shrink the div on click */
   }
 
 .saved-colors {
