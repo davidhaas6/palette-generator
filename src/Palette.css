@@ -1,0 +1,40 @@
+.palette {
+    display: flex;
+    flex-wrap: wrap;
+    /* margin: 20px; */
+    padding: 20px;
+  }
+
+.palette-comment{
+    font-size: 1em;
+}
+  
+  .color {
+    width: 20%;
+    height: 300px;
+    /* position: relative; */
+    display:flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .color-hex {
+    font-size: 2em;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .color:hover .color-hex {
+    opacity: 1;
+  }
+  
+.hex-text {
+    font-weight: bold;
+    transition: background-color 0.3s ease;  /* Add a transition effect */
+
+}
+.hex-text:hover {
+    background-color: black;
+}
