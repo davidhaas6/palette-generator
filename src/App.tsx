@@ -3,16 +3,8 @@ import './App.css';
 import Palette from './components/Palette';
 import Sidebar from './components/Sidebar';
 import { getHexDiscussionPrompt } from './prompt';
-
-import { Configuration, OpenAIApi } from 'openai';
 import { toast } from 'react-hot-toast';
-import { RingLoader } from 'react-spinners';
 import Loader from './components/Loader';
-
-const configuration = new Configuration({
-  apiKey: "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", //todo: bad
-});
-const openai = new OpenAIApi(configuration);
 
 type Color = string;
 
@@ -21,7 +13,6 @@ type Palette = {
   colors: Color[],
   comment?: string,
 }
-
 
 async function getColorPaletteGCP(query: string, verbose?: boolean): Promise<string> {
   const requestBody = {
@@ -37,35 +28,6 @@ async function getColorPaletteGCP(query: string, verbose?: boolean): Promise<str
   console.log(response);
   const text = await response.text();
   return text;
-}
-
-
-async function getColorPalette(query: string, verbose?: boolean): Promise<Color> {
-  const prompt = getHexDiscussionPrompt(query);
-  if (verbose) {
-    console.log("prompt: ", prompt)
-  }
-  const response = await openai.createCompletion({
-    model: "text-davinci-003",
-    prompt: prompt,
-    temperature: 0.8,
-    max_tokens: 200,
-    top_p: 1,
-    frequency_penalty: 0,
-    presence_penalty: 0,
-  },
-    { headers: { "Access-Control-Allow-Origin": "*" } }
-  );
-  if (verbose) {
-    console.log(response.data);
-  }
-  if ('choices' in response.data && response.data.choices.length > 0) {
-    const respText = response.data.choices[0].text;
-    if (respText != null) {
-      return respText;
-    }
-  }
-  return "";
 }
 
 function App() {
