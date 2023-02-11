@@ -10,11 +10,11 @@ export function getHexDiscussionPrompt(
   query: string,
   numColors = 5,
   discussion = "temp",
-  composition = "prof"
+  composition = "artistic"
 ) {
   let prompt = "a " + getComposition(composition) + " " + getColorCount(numColors) + " color palette for " + query
   prompt += ". First, output a comma-delimited list of hex codes. Then output a semicolon."
-  prompt += "Next, " + getDiscussion(discussion) + ":";
+  prompt += "Next, " + getDiscussion(discussion) +":";
   return prompt
 }
 

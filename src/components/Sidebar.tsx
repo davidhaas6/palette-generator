@@ -1,4 +1,5 @@
 import React from 'react';
+import { getBrightness } from './Palette';
 
 type Color = string;
 
@@ -13,6 +14,9 @@ type SidebarProps = {
 }
 
 const Sidebar = ({ palettes, onPaletteClick }: SidebarProps) => {
+  // for (let pal of palettes) {
+  //  pal.colors.sort((a,b) => getBrightness(a) - getBrightness(b))
+  // }
   return (
     <div className="sidebar">
       {palettes.map((palette, index) => (

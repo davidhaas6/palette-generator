@@ -5,8 +5,13 @@
     padding: 20px;
   }
 
+.paletteBody{
+    padding: 0 5%;
+}
+
 .palette-comment{
     font-size: 1em;
+    padding: .5em 20%;
 }
   
   .color {
@@ -19,22 +24,23 @@
     align-items: center;
   }
   
-  .color-hex {
-    font-size: 2em;
-    color: white;
+  .color-label {
+    font-size: 1em;
     opacity: 0;
     transition: opacity 0.3s;
   }
   
-  .color:hover .color-hex {
+  .color:hover .color-label {
     opacity: 1;
   }
   
 .hex-text {
     font-weight: bold;
-    transition: background-color 0.3s ease;  /* Add a transition effect */
-
+    /* transition: background-color 0.3s ease; */
+    width: 100%;
+    font-size: 1em;
 }
+
 .hex-text:hover {
     background-color: black;
 }

@@ -5,10 +5,12 @@ import Sidebar from './components/Sidebar';
 import { getHexDiscussionPrompt } from './prompt';
 
 import { Configuration, OpenAIApi } from 'openai';
+import { toast } from 'react-hot-toast';
+import { RingLoader } from 'react-spinners';
+import Loader from './components/Loader';
 
 const configuration = new Configuration({
   apiKey: "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", //todo: bad
-
 });
 const openai = new OpenAIApi(configuration);
 
@@ -20,10 +22,28 @@ type Palette = {
   comment?: string,
 }
 
-async function getColorPalette(query: string, verbose?: boolean) {
+
+async function getColorPaletteGCP(query: string, verbose?: boolean): Promise<string> {
+  const requestBody = {
+    "prompt": getHexDiscussionPrompt(query),
+  }
+  const response = await fetch("https://generate-palette-hp5qzv2j6a-uc.a.run.app", {
+    body: JSON.stringify(requestBody),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    method: "POST"
+  });
+  console.log(response);
+  const text = await response.text();
+  return text;
+}
+
+
+async function getColorPalette(query: string, verbose?: boolean): Promise<Color> {
   const prompt = getHexDiscussionPrompt(query);
-  if(verbose != null) {
-    console.log("prompt: ",prompt)
+  if (verbose) {
+    console.log("prompt: ", prompt)
   }
   const response = await openai.createCompletion({
     model: "text-davinci-003",
@@ -36,7 +56,16 @@ async function getColorPalette(query: string, verbose?: boolean) {
   },
     { headers: { "Access-Control-Allow-Origin": "*" } }
   );
-  return response;
+  if (verbose) {
+    console.log(response.data);
+  }
+  if ('choices' in response.data && response.data.choices.length > 0) {
+    const respText = response.data.choices[0].text;
+    if (respText != null) {
+      return respText;
+    }
+  }
+  return "";
 }
 
 function App() {
@@ -45,36 +74,33 @@ function App() {
   const [comment, setComment] = useState<string>('');
   const [name, setName] = useState('');
   const [queryText, setQueryText] = useState('');
+  const [loading, setLoading] = useState(false);
 
-
+  // Fetch the data from the API
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch the data from the API
       // console.log("fetching data for: ", queryText)
       try {
-        const response = await getColorPalette(queryText,true);
-        console.log(response.data);
-        if ('choices' in response.data && response.data.choices.length > 0) {
-          const respText = response.data.choices[0].text;
-          console.log("response: ", respText);
-          if (respText != null) {
-            let colorText = respText;
-            if (respText.includes(';')) {
-              colorText = respText.split(';')[0];
-              let discussion = respText.split(';')[1];
-              setComment(discussion);
-            } 
-            const colors = colorText?.trim().split(',');
-            setColors(() => colors);
+        const text = await getColorPaletteGCP(queryText, true);
+        if (text !== "") {
+          let colorText = text;
+          if (text.includes(';')) {
+            colorText = text.split(';')[0];
+            let discussion = text.split(';')[1];
+            setComment(discussion);
           }
+          const colors = colorText?.trim().split(',');
+          setColors(() => colors);
         }
+
       } catch (error: any) {
         console.log(error)
       }
-
       setQueryText('');
+      setLoading(false);
     }
     if (queryText.length > 0) {
+      setLoading(true);
       fetchData();
     }
   }, [queryText]);
@@ -115,6 +141,8 @@ function App() {
     };
     if (!colorsInSaved(colors))
       setPalettes(() => [newPalette, ...palettes]);
+    else
+      toast('Color already saved!')
   }
 
   const loadPalette = (palette: Palette) => {
@@ -138,25 +166,31 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <Sidebar palettes={palettes} onPaletteClick={loadPalette} />
-      <div className="Body">
-        <div className="toolbar">
-          <input type="text" value={name} onChange={event => setName(event.target.value)} />
-          <button onClick={generatePalette}>Generate Palette</button>
-          <button onClick={savePalette} className={colorsInSaved(colors) ? "disabled" : ""}>
-            Save Palette
-          </button>
-          {colors.length > 0 &&
-            <div>
-              <button onClick={copyPalette}>Copy Hex</button>
-              <button onClick={copyCssPalette}>Copy CSS</button>
-            </div>
+    <>
+      <div className="App">
+        <Sidebar palettes={palettes} onPaletteClick={loadPalette} />
+
+        <div className="Body">
+          <div className='header' />
+          <div className="toolbar">
+            <input type="text" value={name} onChange={event => setName(event.target.value)} />
+            <button onClick={generatePalette}>Generate Palette</button>
+            <button onClick={savePalette} className={colorsInSaved(colors) ? "disabled" : ""}>
+              Save Palette
+            </button>
+            {colors.length > 0 &&
+              <div>
+                <button onClick={copyPalette}>Copy Hex</button>
+                <button onClick={copyCssPalette}>Copy CSS</button>
+              </div>
+            }
+          </div>
+          {loading ?
+            <Loader />:<Palette name={name} colors={colors} comment={comment} />
           }
         </div>
-        <Palette name={name} colors={colors} comment={comment} />
       </div>
-    </div>
+    </>
   );
 }
 

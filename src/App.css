@@ -1,10 +1,12 @@
 :root {
-    --color-0: #8B8793;
-    --color-1: #4F4F4F;
-    --color-2: #7B9D9F;
-    --color-3: #F0F2F2;
-    --color-4: #D1D8E0;
-  }
+    --color-0: #A0C9A5;
+    --color-1:  #9CBFA1;
+    --color-2:  #D0D6C1;
+    --color-3:  #C4F1CD;
+    --color-4:  ##F7F3E1;
+
+    --dark-color: #2C2A2B ;
+}
 
 
 .App {
@@ -13,8 +15,8 @@
     width: 100vw;
     height: 100vh;
 
-    background-color: var(--color-3);
-    color: #000000;
+    background-color: var(--color-4);
+    color: --dark-color;
 }
 
 .Body {
@@ -24,19 +26,41 @@
     flex-flow: column nowrap;
     /* justify-content: center; */
     /* align-items: center; */
-    padding: 5%;
 }
 
 .toolbar {
     height: 50px;
     text-align: center;
+    padding: 5%;
 }
 
+.header {
+    /* background-color: #E3DFCF; */
+    width: 100%;
+    height:50px;
+}
+
+.loadingIndicator {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center; 
+    align-items: center; 
+    height: 100%;
+    text-align: center;
+}
+
+.loading-text {
+    padding: 0 0 30px 16px;
+    margin-top: -90px;
+    opacity: .7;
+}
 
 .sidebar {
-    width: 200px;
+    /* background-color: #E3DFCF; */
+    width: 230px;
     height: 100%;
     overflow: auto;
+    padding: 0 15px;
 }
 
 .saved-palette {
