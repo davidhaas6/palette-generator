@@ -12,10 +12,15 @@ export function getHexDiscussionPrompt(
   discussion = "temp",
   composition = "artistic"
 ) {
-  let prompt = "a " + getComposition(composition) + " " + getColorCount(numColors) + " color palette for " + query
-  prompt += ". First, output a comma-delimited list of hex codes. Then output a semicolon."
-  prompt += "Next, " + getDiscussion(discussion) +":";
+  let prompt = "a " + getComposition(composition) + " " + getColorCount(numColors) + " color palette for " + query + ". "
+  prompt += "First, output a comma-delimited list of hex codes. Then output a semicolon."
+  prompt += " Next, " + getDiscussion(discussion) +":";
   return prompt
+}
+
+export function getColorPaletteHex(query: string, numColors = 5): string {
+  const prompt = `An excellent ${getColorCount(numColors)} color palette for ${query}:`
+  return prompt;
 }
 
 

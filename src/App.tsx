@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import Palette from './components/Palette';
 import Sidebar from './components/Sidebar';
-import { getHexDiscussionPrompt } from './prompt';
+import { getHexDiscussionPrompt, getColorPaletteHex} from './prompt';
 import { toast } from 'react-hot-toast';
 import Loader from './components/Loader';
 
@@ -22,6 +22,7 @@ async function getColorPaletteGCP(query: string, verbose?: boolean): Promise<str
     body: JSON.stringify(requestBody),
     headers: {
       "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*"
     },
     method: "POST"
   });
@@ -130,7 +131,7 @@ function App() {
   return (
     <>
       <div className="App">
-        <Sidebar palettes={palettes} onPaletteClick={loadPalette} />
+        {palettes.length > 0 && <Sidebar palettes={palettes} onPaletteClick={loadPalette} />}
 
         <div className="Body">
           <div className='header' />

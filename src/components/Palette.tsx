@@ -11,6 +11,8 @@ type PaletteProps = {
   name: string,
 }
 
+const notify = () => toast('Here is your toast.');
+
 export function getBrightness(hexColor: string): number {
   let rgb = hexToRgb(hexColor);
   if (rgb == null) return -1;
@@ -81,6 +83,7 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
     commentHtml = <div className='palette-comment'>{commentPieces}</div>;
   }
 
+
   // colors.sort((a,b) => getBrightness(a) - getBrightness(b))
   return (
     <div className='paletteBody'>
@@ -94,6 +97,7 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
         ))}
       </div>
       {commentHtml != null && <>{commentHtml}</>}
+      
     </div>
   );
 };
