@@ -59,6 +59,7 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
   const [accentColor, setAccentColor] = useState<string>();
   const [secondColor, setSecondColor] = useState<string>();
   const [darkMode, setDarkMode] = useState(false);
+  const [colorNames, setColorNames] = useState<Color[]>();
 
   const notify = () => toast("Color Copied");
 
@@ -80,18 +81,33 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
   let brighestColor = colors[argmax(brightnesses)]
 
   useEffect(() => {
-    // set defaul colors
+    // set default colors
     setTextColor(darkestColor);
     setBackgColor(brighestColor);
     setSecondColor(brighestColor);
 
     let otherColors = colors.filter((color) => color !== darkestColor && color !== brighestColor)
-    console.log("other:",otherColors);
-    console.log("choice1:", otherColors[Math.floor(Math.random()*otherColors.length)])
-    setAccentColor(otherColors[Math.floor(Math.random()*otherColors.length)])
-    console.log("updating colors")
+    setAccentColor(otherColors[Math.floor(Math.random() * otherColors.length)])
   }, [colors])
-  
+
+  useEffect(() => {
+    const getNames = async () => {
+      let names: Color[] = [];
+      for (let color of colors) {
+        const name = await fetch(`https://api.color.pizza/v1/?values=${color.replace('#','').trim()}`)
+          .then((response) => response.json())
+          .then((json) => json['paletteTitle'])
+          .catch((e) => { console.log(e); return '' })
+        console.log(name)
+        names.push(name);
+      }
+      setColorNames(() => names)
+    }
+    setColorNames(() => [])
+    getNames();
+  }, [colors]);
+
+
   // console.log("brightnesses:", brightnesses)
 
   if (Math.min(...brightnesses) > 200) darkestColor = 'black';
@@ -99,9 +115,7 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
 
   let labelColors = brightnesses.map(
     (brightness) => brightness > 215 ? darkestColor :
-      brightness < 120 ? brighestColor :
-
-        "white"
+      brightness < 120 ? brighestColor : "white"
   );
 
 
@@ -116,7 +130,7 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
         commentPieces.push(<span key={prevIdx}>{comment.substring(prevIdx, match.index)}</span>);
         commentPieces.push(<span
           className="hex-text" key={match[0]}
-          style={{ "color": match[0], "backgroundColor": match[0] === brighestColor ? darkestColor : 'white' }}
+          style={{ "color": match[0] }}
         >{match[0]}</span>);
         prevIdx = match.index + match[0].length;
       }
@@ -134,23 +148,35 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
 
   // console.log(backgColor);
   // colors.sort((a,b) => getBrightness(a) - getBrightness(b))
+
+  const dynamicTextColor = darkMode ? brighestColor : textColor;
+  const dynamicBackgColor = darkMode ? darkModeColor : backgColor;
+  const dynamicSecondaryColor = darkMode ? darkModeColor : secondColor;
+  const dynamicAccentColor = darkMode ? darkModeColor : accentColor;
+
   return (
     <div className='paletteBody'
-      style={{ backgroundColor: darkMode ? darkModeColor : backgColor, color: textColor }}
+      style={{ backgroundColor: dynamicBackgColor, color: dynamicTextColor }}
     >
       <h1 className='palette-title'>{name}</h1>
       <div className="palette">
-        {colors.map((color, i) => (
-          <div key={i} style={{ backgroundColor: color, borderColor:accentColor }} className="color" onClick={handleColorClick}>
+        {colors.map((color, i) => {
+          const isBackgColor = color === dynamicBackgColor;
+          const borderColor = isBackgColor ? accentColor : dynamicBackgColor;
+          const textOpacity = isBackgColor ? 1 : '';
+          return (
+          <div key={i} style={{ backgroundColor: color, borderColor: borderColor }} className="color" onClick={handleColorClick}>
             {/* The hover text */}
-            <div className="color-label" style={{ color: labelColors[i] }}>{color}</div>
+            <div className="color-label" style={{ color: labelColors[i], opacity: textOpacity }}>
+            {colorNames?.[i]} <br/> {color}
+              </div>
 
           </div>
-        ))}
+        )})}
         <ToastContainer limit={3} />
       </div>
       {commentHtml != null && <>{commentHtml}</>}
-      <div className='bottom-bar' style={{ backgroundColor: secondColor }}>
+      <div className='bottom-bar' style={{ backgroundColor: dynamicSecondaryColor }}>
         {colorSelect("Text", fieldOptions.concat([darkModeColor]), setTextColor)}
         {colorSelect("Background", fieldOptions.concat('#edf2f7'), setBackgColor)}
         {colorSelect("Secondary", fieldOptions.concat('#edf2f7'), setSecondColor)}

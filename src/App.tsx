@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import Palette from './components/Palette';
 import Sidebar from './components/Sidebar';
-import { getHexDiscussionPrompt, getColorPaletteHex} from './prompt';
+import { getHexDiscussionPrompt, getColorPaletteHex } from './prompt';
 // import { toast } from 'react-hot-toast';
 import Loader from './components/Loader';
 
@@ -15,8 +15,8 @@ type Palette = {
 }
 
 function b64DecodeUnicode(str: string) {
-  return decodeURIComponent(Array.prototype.map.call(atob(str), function(c): string{
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+  return decodeURIComponent(Array.prototype.map.call(atob(str), function (c): string {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
   }).join(''))
 }
 
@@ -27,7 +27,7 @@ async function getColorPaletteGCP(query: string, verbose?: boolean): Promise<str
     "query": "",
     "pw": "nice meme"
   }
-  console.log(b64DecodeUnicode("aHR0cHM6Ly90ZXN0LXBhbGV0dGUtZ2VuZXJhdG9yLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw"));
+  //aHR0cHM6Ly90ZXN0LXBhbGV0dGUtZ2VuZXJhdG9yLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw
   const response = await fetch(b64DecodeUnicode("aHR0cHM6Ly90ZXN0LXBhbGV0dGUtZ2VuZXJhdG9yLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw"), {
     body: JSON.stringify(requestBody),
     headers: {
@@ -118,14 +118,21 @@ function App() {
     };
     if (!colorsInSaved(colors))
       setPalettes(() => [newPalette, ...palettes]);
-    else {}
-      // toast('Color already saved!')
+    else { }
+    // toast('Color already saved!')
   }
 
   const loadPalette = (palette: Palette) => {
-    setColors(() => palette.colors);
-    setComment(() => palette.comment ?? '');
-    setName(() => palette.name)
+    if (colors.length > 0 && colors.every((color, i) => color === palette.colors[i])) {
+      setColors(() => []);
+      setComment('');
+      setName('');
+      console.log("colors match. aborting", palette.colors, colors)
+    } else {
+      setColors(() => palette.colors);
+      setComment(() => palette.comment ?? '');
+      setName(() => palette.name)
+    }
   }
 
   const copyPalette = () => {
@@ -143,29 +150,34 @@ function App() {
   }
 
   const colorsSaved = colorsInSaved(colors);
-
+  // console.log(colors)
   return (
     <>
       <div className="App">
         {palettes.length > 0 && <Sidebar palettes={palettes} onPaletteClick={loadPalette} />}
-        
+
         <div className="Body">
-        <div className='header' >HueSpeak</div>
+          <div className='header' >LinguaColor</div>
           <div className="toolbar">
-            <input type="text" value={name} onChange={event => setName(event.target.value)} className='text-input'/>
-            <button onClick={generatePalette}>Generate Palette</button>
-            <button onClick={savePalette} className={colorsSaved ? "disabled" : ""}>
-              {colorsSaved ? "Palette Saved" : "Save Palette"} 
-            </button>
-            {colors.length > 0 &&
-              <>
-                <button onClick={copyPalette}>Copy Hex</button>
-                <button onClick={copyCssPalette}>Copy CSS</button>
-              </>
-            }
+            <div>
+              <input type="text" value={name} placeholder="What do you want a color palette for?" onChange={event => setName(event.target.value)} className='text-input' />
+            </div>
+
+            <div className='button-bar'>
+              <button onClick={generatePalette}>Generate Palette</button>
+              {colors.length > 0 &&
+                <>
+                  <button onClick={savePalette} className={colorsSaved ? "disabled" : ""}>
+                    {colorsSaved ? "Palette Saved" : "Save Palette"}
+                  </button>
+                  <button onClick={copyPalette}>Copy Hex</button>
+                  <button onClick={copyCssPalette}>Copy CSS</button>
+                </>
+              }
+            </div>
           </div>
-          {loading ?
-            <Loader />:<Palette name={name} colors={colors} comment={comment} />
+          {colors.length === 0 ? <></> :
+            loading ? <Loader /> : <Palette name={name} colors={colors} comment={comment} />
           }
         </div>
       </div>

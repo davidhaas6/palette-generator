@@ -54,7 +54,7 @@
 }
 
 .color {
-  width: 18%;
+  width: 20%;
   height: 30vh;
   max-height: 300px;
   min-height: 150px;
@@ -66,18 +66,22 @@
   justify-content: center;
   align-items: center;
 
-  border-width: 4px;
+  border-width: 3px;
   border-style: solid;
+  padding: 2.5px;
 }
 
 .color-label {
   font-size: 1em;
   opacity: 0;
   transition: opacity 0.3s;
+  /* transition: transform 0.2s l; */
+  text-align: center;
 }
 
 .color:hover .color-label {
   opacity: 1;
+  /* transform: scale(1.02); */
 }
 
 .hex-text {
