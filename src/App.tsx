@@ -3,7 +3,7 @@ import './App.css';
 import Palette from './components/Palette';
 import Sidebar from './components/Sidebar';
 import { getHexDiscussionPrompt, getColorPaletteHex} from './prompt';
-import { toast } from 'react-hot-toast';
+// import { toast } from 'react-hot-toast';
 import Loader from './components/Loader';
 
 type Color = string;
@@ -14,15 +14,25 @@ type Palette = {
   comment?: string,
 }
 
+function b64DecodeUnicode(str: string) {
+  return decodeURIComponent(Array.prototype.map.call(atob(str), function(c): string{
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+  }).join(''))
+}
+
 async function getColorPaletteGCP(query: string, verbose?: boolean): Promise<string> {
+  console.log("Request:", getHexDiscussionPrompt(query))
   const requestBody = {
     "prompt": getHexDiscussionPrompt(query),
+    "query": "",
+    "pw": "nice meme"
   }
-  const response = await fetch("https://generate-palette-hp5qzv2j6a-uc.a.run.app", {
+  console.log(b64DecodeUnicode("aHR0cHM6Ly90ZXN0LXBhbGV0dGUtZ2VuZXJhdG9yLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw"));
+  const response = await fetch(b64DecodeUnicode("aHR0cHM6Ly90ZXN0LXBhbGV0dGUtZ2VuZXJhdG9yLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw"), {
     body: JSON.stringify(requestBody),
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*"
+      // "Access-Control-Allow-Origin": "*"
     },
     method: "POST"
   });
@@ -46,13 +56,17 @@ function App() {
       try {
         const text = await getColorPaletteGCP(queryText, true);
         if (text !== "") {
+          console.log("Response: ", text)
           let colorText = text;
           if (text.includes(';')) {
             colorText = text.split(';')[0];
             let discussion = text.split(';')[1];
             setComment(discussion);
           }
-          const colors = colorText?.trim().split(',');
+          const max_colors = 5;
+          const regex = /#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/g;
+          const colors = (colorText.match(regex) || []).slice(0, max_colors);
+          // const colors = colorText?.trim().split(',');
           setColors(() => colors);
         }
 
@@ -104,8 +118,8 @@ function App() {
     };
     if (!colorsInSaved(colors))
       setPalettes(() => [newPalette, ...palettes]);
-    else
-      toast('Color already saved!')
+    else {}
+      // toast('Color already saved!')
   }
 
   const loadPalette = (palette: Palette) => {
@@ -128,24 +142,26 @@ function App() {
     navigator.clipboard.writeText(str);
   }
 
+  const colorsSaved = colorsInSaved(colors);
+
   return (
     <>
       <div className="App">
         {palettes.length > 0 && <Sidebar palettes={palettes} onPaletteClick={loadPalette} />}
-
+        
         <div className="Body">
-          <div className='header' />
+        <div className='header' >HueSpeak</div>
           <div className="toolbar">
-            <input type="text" value={name} onChange={event => setName(event.target.value)} />
+            <input type="text" value={name} onChange={event => setName(event.target.value)} className='text-input'/>
             <button onClick={generatePalette}>Generate Palette</button>
-            <button onClick={savePalette} className={colorsInSaved(colors) ? "disabled" : ""}>
-              Save Palette
+            <button onClick={savePalette} className={colorsSaved ? "disabled" : ""}>
+              {colorsSaved ? "Palette Saved" : "Save Palette"} 
             </button>
             {colors.length > 0 &&
-              <div>
+              <>
                 <button onClick={copyPalette}>Copy Hex</button>
                 <button onClick={copyCssPalette}>Copy CSS</button>
-              </div>
+              </>
             }
           </div>
           {loading ?

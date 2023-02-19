@@ -1,50 +1,69 @@
 :root {
+    --color-0: #4a5568;
+    --color-1: #2d3748;
+    --color-2: #e2e8f0;
+    --color-4: #edf2f7;
+    --color-3: #FF9F1C;
+
+    --dark-color: #2d3748;
+}
+
+/* :root {
     --color-0: #A0C9A5;
     --color-1:  #9CBFA1;
     --color-2:  #D0D6C1;
     --color-3:  #C4F1CD;
-    --color-4:  ##F7F3E1;
+    --color-4:  #F7F3E1;
 
     --dark-color: #2C2A2B ;
-}
+} */
 
 
 .App {
     display: flex;
     flex-direction: row;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
 
     background-color: var(--color-4);
-    color: --dark-color;
+    color: var(--dark-color);
 }
 
 .Body {
     display: flex;
     /* flex-direction: column; */
     width: 100%;
+    padding: 2.5%;
     flex-flow: column nowrap;
     /* justify-content: center; */
-    /* align-items: center; */
+    align-items: center;
 }
 
 .toolbar {
     height: 50px;
-    text-align: center;
-    padding: 5%;
+    /* text-align: center; */
+    padding: 1%;
+    width: 100%;
+
+    /* display: flex; */
+    flex-flow: row wrap;
 }
 
 .header {
     /* background-color: #E3DFCF; */
-    width: 100%;
-    height:50px;
+    width: 80%;
+    padding-top: 2%;
+    height: 50px;
+    font-size: xx-large;
+    text-align: center;
+    /* border-bottom: 1px solid #2C2A2B; */
 }
 
 .loadingIndicator {
     display: flex;
     flex-flow: column nowrap;
-    justify-content: center; 
-    align-items: center; 
+    justify-content: center;
+    align-items: center;
     height: 100%;
     text-align: center;
 }
@@ -63,19 +82,27 @@
     padding: 0 15px;
 }
 
+.text-input {
+    min-width: 20%;
+    width: 200px;
+}
+
 .saved-palette {
     padding-top: 12px;
 
-    transition: transform 0.2s ease;  /* Add a transition effect */
-  }
-  
-  .saved-palette:hover {
-    transform: scale(1.05);  /* Expand the div on hover */
-  }
-  
-  .saved-palette:active {
-    transform: scale(0.97);  /* Shrink the div on click */
-  }
+    transition: transform 0.2s ease;
+    /* Add a transition effect */
+}
+
+.saved-palette:hover {
+    transform: scale(1.05);
+    /* Expand the div on hover */
+}
+
+.saved-palette:active {
+    transform: scale(0.97);
+    /* Shrink the div on click */
+}
 
 .saved-colors {
     display: flex;
@@ -87,8 +114,8 @@
     height: 60px;
 }
 
-.disable {
+.disabled {
     cursor: not-allowed !important;
     pointer-events: none;
-    /* color: GrayText; */
+    color: GrayText;
 }
