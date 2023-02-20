@@ -1,10 +1,9 @@
-
 .paletteBody {
   border-radius: 20px;
   background-color: rgb(255, 226, 212);
   /* padding: 0 5%; */
   max-width: 1350px;
-  width:fit-content;
+  width: fit-content;
   min-width: 300px;
   color: rgb(51, 51, 90);
 }
@@ -28,11 +27,20 @@
   /* color: #33335A; */
 }
 
+.divider {
+  margin: 15px 30px 20px;
+  box-shadow: none;
+  border-radius: 3px;
+  border-width: 1px;
+
+}
+
 
 .bottom-bar {
   display: flex;
   flex-flow: row wrap;
-  padding: 0 20px;
+  justify-content: center;
+  /* padding: 0 20px; */
 
   height: 75px;
   background-color: rgb(143, 109, 143);
@@ -53,6 +61,25 @@
   font-weight: bold;
 }
 
+.bar-button {
+  height: 50px;
+  width: 50px;
+  border-radius: 25px;
+  border-width: 3px;
+  margin: 0px 15px;
+  font-size: 20px;
+  padding-right: 7px;
+  padding-bottom: 3px;
+
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s linear;
+  
+}
+
+.bar-button:hover {
+  transform: scale(1.01);
+}
+
 .color {
   width: 20%;
   height: 30vh;
@@ -66,9 +93,14 @@
   justify-content: center;
   align-items: center;
 
-  border-width: 3px;
+  border-width: 0px;
   border-style: solid;
   padding: 2.5px;
+
+}
+
+.shadow {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
 }
 
 .color-label {

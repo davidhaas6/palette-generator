@@ -6,6 +6,8 @@
     --color-3: #FF9F1C;
 
     --dark-color: #2d3748;
+
+    --toastify-color-dark: #2d3748;
 }
 
 /* :root {
@@ -54,6 +56,7 @@
     padding: 20px 0 25px;
     min-height: 50px;
     font-size: 4em;
+    font-weight: bold;
     text-align: center;
 }
 

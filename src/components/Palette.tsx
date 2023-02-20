@@ -1,8 +1,9 @@
 import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import '../Palette.css';
 
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast, Zoom } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import chroma from "chroma-js";
 
 type Color = string;
 
@@ -11,6 +12,8 @@ type PaletteProps = {
   comment?: string,
   name: string,
 }
+
+type StyleModes = "standard" | "dark" | "styled";
 
 const notify = () => toast('Here is your toast.');
 
@@ -58,20 +61,21 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
   const [textColor, setTextColor] = useState<string>();
   const [accentColor, setAccentColor] = useState<string>();
   const [secondColor, setSecondColor] = useState<string>();
-  const [darkMode, setDarkMode] = useState(false);
+  const [styleMode, setStyleMode] = useState<StyleModes>('standard');
   const [colorNames, setColorNames] = useState<Color[]>();
-
-  const notify = () => toast("Color Copied");
 
   const handleColorClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const color = event.currentTarget.style.backgroundColor;
-    navigator.clipboard.writeText(color);
-    toast(`Copied ${color} to clipboard`, {
+    const hex = chroma(color).hex().toUpperCase();
+    navigator.clipboard.writeText(hex);
+    toast(`📋 Copied ${hex} to clipboard`, {
       autoClose: 1500,
-      position: "top-right",
+      position: "bottom-right",
       closeOnClick: true,
       draggable: true,
-      theme: "light"
+      theme: "light",
+      hideProgressBar: true,
+      transition: Zoom,
     })
   }
 
@@ -79,6 +83,26 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
   const brightnesses = useMemo(() => colors.map(getBrightness), [colors])
   let darkestColor = colors[argmin(brightnesses)];
   let brighestColor = colors[argmax(brightnesses)]
+  console.log("Darkest color:", Math.min(...brightnesses))
+
+  useEffect(() => {
+    try {
+      console.log(chroma.contrast(darkestColor, brighestColor))
+      if (chroma.contrast(darkestColor, brighestColor) > 4.5) {
+        setStyleMode('styled')
+      } else {
+        setStyleMode('standard')
+      }
+    } catch (e) {
+      console.log(e)
+    }
+  }, [colors])
+
+  const labelColors = brightnesses.map(
+    (brightness) => brightness > 215 ? darkestColor :
+      brightness < 120 ? brighestColor : "white"
+  );
+
 
   useEffect(() => {
     // set default colors
@@ -94,7 +118,7 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
     const getNames = async () => {
       let names: Color[] = [];
       for (let color of colors) {
-        const name = await fetch(`https://api.color.pizza/v1/?values=${color.replace('#','').trim()}`)
+        const name = await fetch(`https://api.color.pizza/v1/?values=${color.replace('#', '').trim()}`)
           .then((response) => response.json())
           .then((json) => json['paletteTitle'])
           .catch((e) => { console.log(e); return '' })
@@ -106,18 +130,6 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
     setColorNames(() => [])
     getNames();
   }, [colors]);
-
-
-  // console.log("brightnesses:", brightnesses)
-
-  if (Math.min(...brightnesses) > 200) darkestColor = 'black';
-  if (Math.max(...brightnesses) < 180) brighestColor = 'white';
-
-  let labelColors = brightnesses.map(
-    (brightness) => brightness > 215 ? darkestColor :
-      brightness < 120 ? brighestColor : "white"
-  );
-
 
   let commentHtml: ReactElement = <span className='palette-comment'>{comment}</span>;;
   if (comment != null) {
@@ -144,15 +156,40 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
 
   let fieldOptions = colors.concat(['inherit']);
   const darkModeColor = "#2C2A2B"
+  const lightModeColor = "#EDF2F7"
   // fieldOptions.push.apply('inherit')
 
   // console.log(backgColor);
   // colors.sort((a,b) => getBrightness(a) - getBrightness(b))
 
-  const dynamicTextColor = darkMode ? brighestColor : textColor;
-  const dynamicBackgColor = darkMode ? darkModeColor : backgColor;
-  const dynamicSecondaryColor = darkMode ? darkModeColor : secondColor;
-  const dynamicAccentColor = darkMode ? darkModeColor : accentColor;
+  const styleColors = {
+    backgroundColor: {
+      "standard": lightModeColor,
+      "dark": darkModeColor,
+      "styled": backgColor,
+    },
+    textColor: {
+      "standard": darkModeColor,
+      "dark": lightModeColor,
+      "styled": textColor,
+    },
+    secondaryColor: {
+      "standard": lightModeColor,
+      "dark": darkModeColor,
+      "styled": secondColor,
+    },
+    accentColor: {
+      "standard": lightModeColor,
+      "dark": darkModeColor,
+      "styled": accentColor,
+    }
+  }
+  const dynamicTextColor = styleColors.textColor[styleMode];
+  const dynamicBackgColor = styleColors.backgroundColor[styleMode];
+  const dynamicSecondaryColor = styleColors.secondaryColor[styleMode];
+  const dynamicAccentColor = styleColors.accentColor[styleMode];
+
+  const buttonStyle = { borderColor: dynamicTextColor }
 
   return (
     <div className='paletteBody'
@@ -163,27 +200,46 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
         {colors.map((color, i) => {
           const isBackgColor = color === dynamicBackgColor;
           const borderColor = isBackgColor ? accentColor : dynamicBackgColor;
-          const textOpacity = isBackgColor ? 1 : '';
+          const textOpacity = '';
           return (
-          <div key={i} style={{ backgroundColor: color, borderColor: borderColor }} className="color" onClick={handleColorClick}>
-            {/* The hover text */}
-            <div className="color-label" style={{ color: labelColors[i], opacity: textOpacity }}>
-            {colorNames?.[i]} <br/> {color}
+            <div key={i} style={{
+              backgroundColor: color,
+              borderColor: borderColor
+            }}
+              className={"color" + (isBackgColor ? " shadow" : "")}
+              onClick={handleColorClick}
+            >
+              {/* The hover text */}
+              <div className="color-label" style={{ color: labelColors[i], opacity: textOpacity }}>
+                {colorNames?.[i]} <br /> {color}
               </div>
 
-          </div>
-        )})}
-        <ToastContainer limit={3} />
+            </div>
+          )
+        })}
+        <ToastContainer
+          limit={3}
+        />
       </div>
       {commentHtml != null && <>{commentHtml}</>}
+      <hr className='divider' style={{ borderColor: chroma(dynamicTextColor as string).alpha(.2).hex() }} />
       <div className='bottom-bar' style={{ backgroundColor: dynamicSecondaryColor }}>
-        {colorSelect("Text", fieldOptions.concat([darkModeColor]), setTextColor)}
+        {/* {colorSelect("Text", fieldOptions.concat([darkModeColor]), setTextColor)}
         {colorSelect("Background", fieldOptions.concat('#edf2f7'), setBackgColor)}
         {colorSelect("Secondary", fieldOptions.concat('#edf2f7'), setSecondColor)}
-        {colorSelect("Accent", fieldOptions, setAccentColor)}
-
-        <button onClick={() => setDarkMode((mode) => !mode)}>
-          {darkMode ? "☀️" : "🌙"}
+        {colorSelect("Accent", fieldOptions, setAccentColor)} */}
+        <button className='bar-button' style={{ borderColor: textColor }}
+          onClick={() => setStyleMode('standard')}>
+          ☀️
+        </button>
+        <button className='bar-button' style={{ borderColor: textColor }}
+          onClick={() => setStyleMode(styleMode === 'dark' ? 'standard' : 'dark')}
+        >
+          🌙
+        </button>
+        <button className='bar-button' style={{ borderColor: textColor }}
+          onClick={() => setStyleMode(styleMode === 'styled' ? 'standard' : 'styled')}>
+          🎨
         </button>
       </div>
     </div>

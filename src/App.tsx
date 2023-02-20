@@ -28,7 +28,9 @@ async function getColorPaletteGCP(query: string, verbose?: boolean): Promise<str
     "pw": "nice meme"
   }
   //aHR0cHM6Ly90ZXN0LXBhbGV0dGUtZ2VuZXJhdG9yLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw
-  const response = await fetch(b64DecodeUnicode("aHR0cHM6Ly90ZXN0LXBhbGV0dGUtZ2VuZXJhdG9yLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw"), {
+  //aHR0cHM6Ly90ZXN0LXBhbGV0dGUtZ2VuZXJhdG9yLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw
+  //aHR0cHM6Ly9nZW5lcmF0ZS1wYWxldHRlLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw
+  const response = await fetch(b64DecodeUnicode("aHR0cHM6Ly9nZW5lcmF0ZS1wYWxldHRlLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw"), {
     body: JSON.stringify(requestBody),
     headers: {
       "Content-Type": "application/json",
@@ -40,6 +42,18 @@ async function getColorPaletteGCP(query: string, verbose?: boolean): Promise<str
   const text = await response.text();
   return text;
 }
+
+const placeholderTexts = [
+  'Warm summer nights',
+  'a pastel sunset',
+  'Dark green',
+  'A sleek website for a law firm',
+  'A beautiful Appalachian sunset',
+  'A rustic cafe in southern France',
+  'Sad red vibes',
+  'Colors that work well with #F6B5B5',
+  'A palette that pairs well with #8E8C6D and #D2A26F'
+]
 
 function App() {
   const [palettes, setPalettes] = useState<Palette[]>([]);
@@ -64,8 +78,9 @@ function App() {
             setComment(discussion);
           }
           const max_colors = 5;
-          const regex = /#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/g;
-          const colors = (colorText.match(regex) || []).slice(0, max_colors);
+          const regex = /([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/g;
+          let colors = (colorText.match(regex) || []).slice(0, max_colors);
+          colors = colors.map((color) => "#"+color)
           // const colors = colorText?.trim().split(',');
           setColors(() => colors);
         }
@@ -150,6 +165,8 @@ function App() {
   }
 
   const colorsSaved = colorsInSaved(colors);
+
+  const searchPlaceholder = placeholderTexts[Math.floor(Math.random() * placeholderTexts.length)]
   // console.log(colors)
   return (
     <>
@@ -157,10 +174,10 @@ function App() {
         {palettes.length > 0 && <Sidebar palettes={palettes} onPaletteClick={loadPalette} />}
 
         <div className="Body">
-          <div className='header' >LinguaColor</div>
+          <div className='header' >color author</div>
           <div className="toolbar">
             <div>
-              <input type="text" value={name} placeholder="What do you want a color palette for?" onChange={event => setName(event.target.value)} className='text-input' />
+              <input type="text" value={name} placeholder={searchPlaceholder} onChange={event => setName(event.target.value)} className='text-input' />
             </div>
 
             <div className='button-bar'>
