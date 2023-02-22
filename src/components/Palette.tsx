@@ -4,6 +4,7 @@ import '../Palette.css';
 import { ToastContainer, toast, Zoom } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import chroma from "chroma-js";
+import { MdFavoriteBorder, MdWbSunny } from 'react-icons/md'
 
 type Color = string;
 
@@ -11,11 +12,11 @@ type PaletteProps = {
   colors: Color[],
   comment?: string,
   name: string,
+  onSave: () => void;
+  isSaved: boolean;
 }
 
 type StyleModes = "standard" | "dark" | "styled";
-
-const notify = () => toast('Here is your toast.');
 
 export function getBrightness(hexColor: string): number {
   let rgb = hexToRgb(hexColor);
@@ -55,8 +56,31 @@ function colorSelect(label: string, colors: Color[], onSelect: (_: string) => vo
   )
 }
 
+const copyCssPalette = (colors: Color[], names?: string[]) => {
+  let str = ':root {\n';
+  for (const i in colors) {
+    str += '  --color-' + (i).toString() + ': ' + colors[i] + `;`;
+    str += names == null ? '\n' : ` /* ${names[i]} */\n`;
+  }
+  str += '}';
+  navigator.clipboard.writeText(str);
+  defaultToast('📋 Copied CSS to clipboard');
+}
 
-const Palette = ({ colors, comment, name }: PaletteProps) => {
+
+function defaultToast(message: string) {
+  return toast(message, {
+    autoClose: 1500,
+    position: "bottom-right",
+    closeOnClick: true,
+    draggable: true,
+    theme: "light",
+    hideProgressBar: true,
+    transition: Zoom,
+  })
+}
+
+const Palette = ({ colors, comment, name, onSave, isSaved }: PaletteProps) => {
   const [backgColor, setBackgColor] = useState<string>();
   const [textColor, setTextColor] = useState<string>();
   const [accentColor, setAccentColor] = useState<string>();
@@ -68,26 +92,31 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
     const color = event.currentTarget.style.backgroundColor;
     const hex = chroma(color).hex().toUpperCase();
     navigator.clipboard.writeText(hex);
-    toast(`📋 Copied ${hex} to clipboard`, {
-      autoClose: 1500,
-      position: "bottom-right",
-      closeOnClick: true,
-      draggable: true,
-      theme: "light",
-      hideProgressBar: true,
-      transition: Zoom,
-    })
+    defaultToast(`📋 Copied ${hex} to clipboard`)
   }
+
+  const handleSaveClick = () => {
+    console.log(isSaved)
+    if (!isSaved) {
+      onSave(); 
+      defaultToast(`🖼️ Saved "${name}"`);
+    }
+    else {
+      // defaultToast(`🥳 ${name} saved!`);
+    }
+  } 
 
   // brightness schenangigans
   const brightnesses = useMemo(() => colors.map(getBrightness), [colors])
   let darkestColor = colors[argmin(brightnesses)];
   let brighestColor = colors[argmax(brightnesses)]
-  console.log("Darkest color:", Math.min(...brightnesses))
+  
 
   useEffect(() => {
     try {
-      console.log(chroma.contrast(darkestColor, brighestColor))
+      console.log("Brightest color:", Math.max(...brightnesses))
+      console.log("Darkest color:", Math.min(...brightnesses))
+      console.log("contrast:",chroma.contrast(darkestColor, brighestColor))
       if (chroma.contrast(darkestColor, brighestColor) > 4.5) {
         setStyleMode('styled')
       } else {
@@ -184,12 +213,10 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
       "styled": accentColor,
     }
   }
-  const dynamicTextColor = styleColors.textColor[styleMode];
-  const dynamicBackgColor = styleColors.backgroundColor[styleMode];
-  const dynamicSecondaryColor = styleColors.secondaryColor[styleMode];
-  const dynamicAccentColor = styleColors.accentColor[styleMode];
-
-  const buttonStyle = { borderColor: dynamicTextColor }
+  const dynamicTextColor = styleColors.textColor[styleMode]?.trim();
+  const dynamicBackgColor = styleColors.backgroundColor[styleMode]?.trim();
+  const dynamicSecondaryColor = styleColors.secondaryColor[styleMode]?.trim();
+  const dynamicAccentColor = styleColors.accentColor[styleMode]?.trim();
 
   return (
     <div className='paletteBody'
@@ -224,23 +251,28 @@ const Palette = ({ colors, comment, name }: PaletteProps) => {
       {commentHtml != null && <>{commentHtml}</>}
       <hr className='divider' style={{ borderColor: chroma(dynamicTextColor as string).alpha(.2).hex() }} />
       <div className='bottom-bar' style={{ backgroundColor: dynamicSecondaryColor }}>
-        {/* {colorSelect("Text", fieldOptions.concat([darkModeColor]), setTextColor)}
-        {colorSelect("Background", fieldOptions.concat('#edf2f7'), setBackgColor)}
-        {colorSelect("Secondary", fieldOptions.concat('#edf2f7'), setSecondColor)}
-        {colorSelect("Accent", fieldOptions, setAccentColor)} */}
-        <button className='bar-button' style={{ borderColor: textColor }}
-          onClick={() => setStyleMode('standard')}>
-          ☀️
-        </button>
-        <button className='bar-button' style={{ borderColor: textColor }}
-          onClick={() => setStyleMode(styleMode === 'dark' ? 'standard' : 'dark')}
-        >
-          🌙
-        </button>
-        <button className='bar-button' style={{ borderColor: textColor }}
-          onClick={() => setStyleMode(styleMode === 'styled' ? 'standard' : 'styled')}>
-          🎨
-        </button>
+        <div className='action-buttons'>
+          <button title='Toggle Preview' className='bar-button' style={{ borderColor: textColor }}
+            onClick={() => setStyleMode(styleMode === 'styled' ? 'standard' : 'styled')}>
+            🎨
+          </button>
+          <button title='Toggle Dark Mode' className='bar-button' style={{ borderColor: textColor }}
+            onClick={() => setStyleMode(styleMode === 'dark' ? 'standard' : 'dark')}>
+            🌙
+          </button>
+          <button title='Copy' className='bar-button' style={{ borderColor: textColor }}
+            onClick={() => copyCssPalette(colors, colorNames)}>
+            📋
+          </button>
+        </div>
+
+        <div>
+          {/* TODO: regenerate button?  */}
+          <button title='Favorite' className='bar-button big' style={{ borderColor: textColor }}          
+            onClick={() => handleSaveClick()}>
+            {isSaved ? "💔" : "❤️"}
+          </button>
+        </div>
       </div>
     </div>
   );

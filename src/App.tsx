@@ -28,9 +28,8 @@ async function getColorPaletteGCP(query: string, verbose?: boolean): Promise<str
     "pw": "nice meme"
   }
   //aHR0cHM6Ly90ZXN0LXBhbGV0dGUtZ2VuZXJhdG9yLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw
-  //aHR0cHM6Ly90ZXN0LXBhbGV0dGUtZ2VuZXJhdG9yLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw
   //aHR0cHM6Ly9nZW5lcmF0ZS1wYWxldHRlLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw
-  const response = await fetch(b64DecodeUnicode("aHR0cHM6Ly9nZW5lcmF0ZS1wYWxldHRlLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw"), {
+  const response = await fetch(b64DecodeUnicode("aHR0cHM6Ly90ZXN0LXBhbGV0dGUtZ2VuZXJhdG9yLWhwNXF6djJqNmEtdWMuYS5ydW4uYXBw"), {
     body: JSON.stringify(requestBody),
     headers: {
       "Content-Type": "application/json",
@@ -80,7 +79,7 @@ function App() {
           const max_colors = 5;
           const regex = /([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/g;
           let colors = (colorText.match(regex) || []).slice(0, max_colors);
-          colors = colors.map((color) => "#"+color)
+          colors = colors.map((color) => "#" + color)
           // const colors = colorText?.trim().split(',');
           setColors(() => colors);
         }
@@ -92,21 +91,22 @@ function App() {
       setLoading(false);
     }
     if (queryText.length > 0) {
+      console.log("Loading: ", queryText)
       setLoading(true);
       fetchData();
     }
   }, [queryText]);
 
+  // Load the saved palettes from local storage
   useEffect(() => {
-    // Load the saved palettes from local storage
     const savedPalettes = localStorage.getItem('palettes');
     if (savedPalettes) {
       setPalettes(() => JSON.parse(savedPalettes) as Palette[]);
     }
   }, []);
 
+  // Save the palettes to local storage
   useEffect(() => {
-    // Save the palettes to local storage
     if (palettes.length > 0) {
       localStorage.setItem('palettes', JSON.stringify(palettes));
     }
@@ -158,7 +158,6 @@ function App() {
     let str = ':root {\n';
     for (const i in colors) {
       str += '  --color-' + (i).toString() + ': ' + colors[i] + ';\n';
-
     }
     str += '}';
     navigator.clipboard.writeText(str);
@@ -174,27 +173,20 @@ function App() {
         {palettes.length > 0 && <Sidebar palettes={palettes} onPaletteClick={loadPalette} />}
 
         <div className="Body">
-          <div className='header' >color author</div>
+          <div className='header' >spectrimo</div>
+          <div className='subheader'>Smart and Fun AI-Generated Color Palettes</div>
           <div className="toolbar">
-            <div>
-              <input type="text" value={name} placeholder={searchPlaceholder} onChange={event => setName(event.target.value)} className='text-input' />
-            </div>
 
-            <div className='button-bar'>
-              <button onClick={generatePalette}>Generate Palette</button>
-              {colors.length > 0 &&
-                <>
-                  <button onClick={savePalette} className={colorsSaved ? "disabled" : ""}>
-                    {colorsSaved ? "Palette Saved" : "Save Palette"}
-                  </button>
-                  <button onClick={copyPalette}>Copy Hex</button>
-                  <button onClick={copyCssPalette}>Copy CSS</button>
-                </>
-              }
-            </div>
+            <input type="text" value={name} placeholder={searchPlaceholder}
+              onChange={event => setName(event.target.value)} className='text-input' />
+              <button className='button' onClick={generatePalette}>Create</button>
+
           </div>
-          {colors.length === 0 ? <></> :
-            loading ? <Loader /> : <Palette name={name} colors={colors} comment={comment} />
+
+          {/* Main body */}
+          { loading ? <Loader />  :
+            colors.length === 0 ? <></> :
+             <Palette name={name} colors={colors} comment={comment} onSave={savePalette} isSaved={colorsSaved} />
           }
         </div>
       </div>

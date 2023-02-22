@@ -1,6 +1,3 @@
-import React from 'react';
-import { getBrightness } from './Palette';
-
 type Color = string;
 
 type Palette = {
