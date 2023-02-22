@@ -45,7 +45,7 @@ async function getColorPaletteGCP(query: string, verbose?: boolean): Promise<str
 const placeholderTexts = [
   'Warm summer nights',
   'a pastel sunset',
-  'Dark green',
+  'vibrant hues of orange',
   'A sleek website for a law firm',
   'A beautiful Appalachian sunset',
   'A rustic cafe in southern France',
@@ -150,19 +150,6 @@ function App() {
     }
   }
 
-  const copyPalette = () => {
-    navigator.clipboard.writeText(colors.toString());
-  }
-
-  const copyCssPalette = () => {
-    let str = ':root {\n';
-    for (const i in colors) {
-      str += '  --color-' + (i).toString() + ': ' + colors[i] + ';\n';
-    }
-    str += '}';
-    navigator.clipboard.writeText(str);
-  }
-
   const colorsSaved = colorsInSaved(colors);
 
   const searchPlaceholder = placeholderTexts[Math.floor(Math.random() * placeholderTexts.length)]
@@ -176,11 +163,9 @@ function App() {
           <div className='header' >spectrimo</div>
           <div className='subheader'>Smart and Fun AI-Generated Color Palettes</div>
           <div className="toolbar">
-
             <input type="text" value={name} placeholder={searchPlaceholder}
               onChange={event => setName(event.target.value)} className='text-input' />
               <button className='button' onClick={generatePalette}>Create</button>
-
           </div>
 
           {/* Main body */}
